@@ -1,0 +1,108 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>うちのレシピ帳｜写真付きZIP対応・修正版3</title><style>
+:root{--green:#27664e;--bg:#f7f8f4;--ink:#26332c;--muted:#68756d;--line:#e0e8df}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}header{background:white;border-bottom:1px solid var(--line);padding:18px max(18px,calc((100vw - 900px)/2))}h1{font-size:23px;margin:0}header p{color:var(--muted);font-size:13px;margin:5px 0 0}main{max-width:900px;margin:auto;padding:18px 16px 80px}.tabs{display:flex;gap:8px;margin-bottom:16px}.tab,.btn{border:1px solid var(--line);background:white;border-radius:12px;padding:11px 15px;font-weight:700;color:var(--ink)}.tab.active,.primary{background:var(--green);color:white;border-color:var(--green)}.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}h2{font-size:20px;margin:0 0 12px}h3{font-size:16px;margin:20px 0 10px}p{line-height:1.7}.hint{color:var(--muted);font-size:13px}.field{margin:12px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}input[type=text],input[type=number],input[type=search],textarea{width:100%;border:1px solid #cad8cd;border-radius:10px;padding:12px;background:white;color:var(--ink)}textarea{min-height:130px;resize:vertical;line-height:1.65}.actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}.btn:disabled{opacity:.5;cursor:not-allowed}.upload{display:block;border:2px dashed #aac9b7;background:#f2f8f3;border-radius:14px;padding:25px;text-align:center;font-weight:700;cursor:pointer}.upload input{display:none}.preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}.photo{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f5f5f5}.photo img{width:100%;height:150px;object-fit:contain}.photo footer{display:flex;gap:4px;justify-content:center;padding:7px}.photo button{font-size:12px;padding:6px}.status{background:#eef6f0;border-radius:10px;padding:10px 12px;font-size:13px;white-space:pre-wrap}progress{width:100%;height:12px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.recipe{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}.recipe h3{margin:0 0 8px}.recipe p{font-size:13px;color:var(--muted);margin:5px 0}.warn{background:#fff7e7;padding:12px;border-radius:10px;font-size:13px}.small{font-size:12px}.cover{width:100%;max-height:320px;object-fit:cover;border-radius:14px;margin:8px 0 12px}.stepRow{display:flex;gap:13px;align-items:flex-start;border-top:1px solid var(--line);padding:14px 0}.stepRow img{width:110px;height:100px;object-fit:cover;border-radius:10px}.stepRow div{flex:1;white-space:pre-wrap}.noteBlock{background:#f1f7f1;border-radius:12px;padding:12px;white-space:pre-wrap}button.danger{color:#a12f29}#detail{white-space:pre-wrap;line-height:1.7}@media(max-width:600px){.panel{padding:15px}.tabs{overflow-x:auto}h1{font-size:21px}}
+</style></head><body><header><h1>🍳 うちのレシピ帳</h1><p>ChatGPTで整理したレシピZIPをまとめて登録 <strong style="color:#27664e">v3 修正版</strong></p></header><main><nav class="tabs"><button class="tab active" id="t-new" onclick="switchRecipePage('new')">📷 写真から登録</button><button class="tab" id="t-list" onclick="switchRecipePage('list')">📖 レシピ一覧</button><button class="tab" id="t-backup" onclick="switchRecipePage('backup')">⚙️ バックアップ</button></nav>
+<section id="new"><div class="panel"><h2>① 写真を選ぶ</h2><p class="hint">材料と作り方のページをまとめて選択できます。横向きの写真は回転してから読み取ってください。</p><label class="upload">＋ 料理本の写真を追加<input id="files" type="file" accept="image/*" multiple onchange="addPhotos(this.files);this.value=''"/></label><div id="photos" class="preview"></div><div class="actions"><button class="btn primary" id="ocrBtn" onclick="readPhotos()">写真の文字を読み取る</button><button class="btn" onclick="clearPhotos()">写真をクリア</button></div><progress id="prog" value="0" max="100" class="hidden"></progress><div id="status" class="status">日本語OCRの初回利用にはインターネット接続が必要です。読み取りはこの端末内で処理します。</div></div>
+<div class="panel"><h2>② 内容を確認・修正</h2><p class="warn">⚠️ 文字認識は誤読する場合があります。特に分量・加熱時間・調味料は必ず元の写真と照合してください。写真だけでは文章の意味を正確に理解できないため、下書きとして利用してください。</p><div class="grid"><div class="field"><label>料理名</label><input id="name" type="text" placeholder="料理名を入力"></div><div class="field"><label>人数</label><input id="servings" type="text" placeholder="例：2人分"></div><div class="field"><label>調理時間</label><input id="time" type="text" placeholder="例：25分"></div><div class="field"><label>分類・タグ</label><input id="tags" type="text" placeholder="例：鶏肉、夕食"></div></div><div class="field"><label>材料（1行に1材料）</label><textarea id="ingredients" placeholder="鶏手羽先：8本&#10;じゃがいも：2個"></textarea></div><div class="field"><label>作り方</label><textarea id="steps" style="min-height:190px" placeholder="1. 下ごしらえをする&#10;2. フライパンで焼く"></textarea></div><details><summary>読み取った元の文章（編集可能）</summary><div class="field"><textarea id="raw" style="min-height:200px" placeholder="ここにOCR結果が入ります"></textarea></div><button class="btn" onclick="parseRaw()">この文章から再整理する</button></details><div class="actions"><button class="btn primary" onclick="saveRecipe()">レシピを保存</button><button class="btn" onclick="resetForm()">入力をクリア</button></div></div></section>
+<section id="list" class="hidden"><div class="panel"><h2>保存したレシピ</h2><input type="search" id="search" placeholder="料理名・材料・タグで検索" oninput="renderList()"><div id="recipes" class="grid" style="margin-top:16px"></div></div><div id="detailPanel" class="panel hidden"><div id="detail"></div><div class="actions"><button class="btn" onclick="editRecipe()">編集する</button><button class="btn danger" onclick="deleteRecipe()">削除する</button><button class="btn" onclick="document.getElementById('detailPanel').classList.add('hidden')">閉じる</button></div></div></section>
+<section id="backup" class="hidden"><div class="panel"><h2>📦 ChatGPTのレシピZIPを登録</h2><p>ChatGPTから受け取ったZIPファイルを選択すると、レシピをまとめて追加できます。既存のレシピは消えません。</p><label class="upload">＋ レシピZIPを選ぶ<input type="file" accept=".zip,application/zip,application/x-zip-compressed" onchange="importRecipeZip(this.files[0]);this.value=''" /></label><p id="zipStatus" class="status">ZIP内の recipes.json を読み込みます。完成写真・工程写真も一緒に登録できます。</p><p class="hint">初回はZIP展開ライブラリの読み込みに通信が必要です。レシピの保存先はこの端末のブラウザ内です。</p></div><div class="panel"><h2>バックアップ</h2><p>レシピはこのブラウザ内に保存されます。端末変更やブラウザのデータ消去で失われるため、定期的にJSONファイルを保存してください。</p><div class="actions"><button class="btn primary" onclick="exportData()">バックアップを書き出す</button><label class="btn">バックアップを読み込む<input type="file" accept=".json,application/json" style="display:none" onchange="importData(this.files[0]);this.value=''"/></label></div><p class="hint">写真は容量を抑えた縮小画像としてレシピに保存します。ブラウザの保存容量には制限があります。</p></div></section></main>
+<script>
+// Independent navigation: does not depend on ZIP/OCR libraries or storage.
+function switchRecipePage(page) {
+  ['new','list','backup'].forEach(function(name) {
+    var section=document.getElementById(name);
+    var button=document.getElementById('t-'+name);
+    if(section){section.classList.toggle('hidden',name!==page);section.hidden=(name!==page);}
+    if(button){button.classList.toggle('active',name===page);button.setAttribute('aria-selected',String(name===page));}
+  });
+  if(page==='list' && typeof renderList==='function') {
+    try {renderList();} catch(err) {console.error('Recipe list error:',err);}
+  }
+  if(page==='backup') {
+    var status=document.getElementById('zipStatus');
+    if(status && !status.textContent.trim()) status.textContent='ZIPを選択してください。';
+  }
+}
+window.addEventListener('DOMContentLoaded',function(){
+  ['new','list','backup'].forEach(function(name){
+    var btn=document.getElementById('t-'+name);
+    if(btn) btn.addEventListener('click',function(){switchRecipePage(name);});
+  });
+  var page=location.hash.replace('#','');
+  switchRecipePage(['new','list','backup'].includes(page)?page:'new');
+});
+</script>
+<script>
+const KEY='uchi-recipes-v2';let photos=[],editing=null,selected=null;const $=id=>document.getElementById(id);const getAll=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return []}};const setAll=a=>localStorage.setItem(KEY,JSON.stringify(a));const fields=['name','servings','time','tags','ingredients','steps','raw'];function tab(t){for(const x of ['new','list','backup']){$(x).classList.toggle('hidden',x!==t);$('t-'+x).classList.toggle('active',x===t)}if(t==='list')renderList()}
+function rotateCanvas(src,angle,max=1600,quality=.85){return new Promise((resolve,reject)=>{let im=new Image();im.onload=()=>{let scale=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*scale),h=Math.round(im.height*scale),side=angle%180!==0,c=document.createElement('canvas');c.width=side?h:w;c.height=side?w:h;let ctx=c.getContext('2d');ctx.translate(c.width/2,c.height/2);ctx.rotate(angle*Math.PI/180);ctx.drawImage(im,-w/2,-h/2,w,h);resolve(c.toDataURL('image/jpeg',quality))};im.onerror=reject;im.src=src})}
+async function addPhotos(files){for(const f of Array.from(files).slice(0,8)){if(!f.type.startsWith('image/'))continue;const url=await new Promise(r=>{let fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});photos.push({src:await rotateCanvas(url,0),name:f.name})}renderPhotos()}
+function renderPhotos(){$('photos').innerHTML='';photos.forEach((p,i)=>{let d=document.createElement('div');d.className='photo';let im=document.createElement('img');im.src=p.src;im.alt='写真'+(i+1);let f=document.createElement('footer');let rot=document.createElement('button');rot.textContent='↻ 90°';rot.onclick=async()=>{p.src=await rotateCanvas(p.src,90);renderPhotos()};let del=document.createElement('button');del.textContent='削除';del.onclick=()=>{photos.splice(i,1);renderPhotos()};f.append(rot,del);d.append(im,f);$('photos').append(d)})}
+function clearPhotos(){photos=[];renderPhotos()}function status(s){$('status').textContent=s}let ocrLib;
+async function loadOCR(){if(window.Tesseract)return window.Tesseract;if(ocrLib)return ocrLib;ocrLib=new Promise((resolve,reject)=>{let s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=()=>resolve(window.Tesseract);s.onerror=()=>reject(new Error('OCRライブラリを読み込めません。インターネット接続を確認してください。'));document.head.append(s)});return ocrLib}
+async function readPhotos(){if(!photos.length){alert('写真を追加してください');return}let btn=$('ocrBtn');btn.disabled=true;$('prog').classList.remove('hidden');$('prog').value=0;let worker;try{status('日本語の文字認識データを準備しています。初回は少し時間がかかります。');let T=await loadOCR();worker=await T.createWorker('jpn+eng',1,{logger:m=>{if(m.status==='recognizing text'){$('prog').value=Math.round((currentIndex+(m.progress||0))/photos.length*100)}}});let texts=[];for(var currentIndex=0;currentIndex<photos.length;currentIndex++){status(`写真 ${currentIndex+1} / ${photos.length} を読み取り中…`);let r=await worker.recognize(photos[currentIndex].src);texts.push(`【写真${currentIndex+1}】\n${r.data.text}`)}$('raw').value=texts.join('\n\n');parseRaw();status('文字の読み取りが完了しました。料理名・材料・作り方を写真と見比べて修正してください。');$('prog').value=100}catch(e){status('読み取りに失敗しました：'+e.message+'\n写真の選択と手入力は引き続き使えます。')}finally{if(worker)await worker.terminate();btn.disabled=false}}
+function parseRaw(){const raw=$('raw').value,lines=raw.split(/\n/).map(s=>s.trim()).filter(Boolean);let title=lines.find(s=>!/^【写真|材料|作り方|下ごしらえ|\d+[分人]|カロリー|塩分/.test(s)&&s.length>=4&&s.length<35)||'';if(!$('name').value)$('name').value=title;let serving=raw.match(/\d+\s*人分/),time=raw.match(/(?:調理時間\s*)?(\d{1,3})\s*分/);if(serving&&!$('servings').value)$('servings').value=serving[0];if(time&&!$('time').value)$('time').value=time[1]+'分';let ing=[],steps=[],mode='';for(let s of lines){if(/^(材料|材 料|調味料)/.test(s)){mode='ing';continue}if(/^(作り方|つくり方|下ごしらえ|手順)/.test(s)){mode='steps';continue}if(/^【写真/.test(s))continue;if(mode==='ing'){if(/\d|大さじ|小さじ|適量|少々|カップ/.test(s))ing.push(s)}else if(mode==='steps')steps.push(s);else if(/^[①-⑨❶-❾1-9][.．、\s]/.test(s))steps.push(s)}if(ing.length&&!$('ingredients').value)$('ingredients').value=ing.join('\n');if(steps.length&&!$('steps').value)$('steps').value=steps.join('\n');if(!ing.length||!steps.length)status('OCR文章を取得しました。見出しや縦書きの影響で自動分類できない部分があります。「読み取った元の文章」を見て材料・手順を補ってください。')}
+async function thumbnails(){return Promise.all(photos.slice(0,5).map(p=>rotateCanvas(p.src,0,650,.65)))}async function saveRecipe(){if(!$('name').value.trim()){alert('料理名を入力してください');return}let r={id:editing||String(Date.now()),updated:new Date().toISOString()};for(let f of fields)r[f]=$(f).value.trim();r.photos=photos.length?await thumbnails():(getAll().find(x=>x.id===editing)?.photos||[]);let a=getAll().filter(x=>x.id!==r.id);a.unshift(r);try{setAll(a)}catch(e){alert('保存容量が不足しています。バックアップ後に不要なレシピを削除してください。');return}editing=null;resetForm();switchRecipePage('list');alert('保存しました')}
+function resetForm(){editing=null;for(let f of fields)$(f).value='';clearPhotos();status('写真を選択して読み取りを開始してください。')}
+function renderList(){let q=$('search').value.toLowerCase(),a=getAll().filter(r=>[r.name,r.tags,r.ingredients].join(' ').toLowerCase().includes(q));$('recipes').innerHTML='';if(!a.length){$('recipes').textContent='レシピはまだありません。写真から登録してみてください。';return}for(let r of a){let d=document.createElement('div');d.className='recipe';let h=document.createElement('h3');h.textContent=r.name;d.append(h);if(r.photos?.[0]){let im=document.createElement('img');im.src=r.photos[0];im.style='width:100%;height:140px;object-fit:contain;border-radius:9px';d.append(im)}let p=document.createElement('p');p.textContent=[r.servings,r.time,r.tags].filter(Boolean).join(' ・ ');d.append(p);let b=document.createElement('button');b.className='btn';b.textContent='レシピを見る';b.onclick=()=>showRecipe(r.id);d.append(b);$('recipes').append(d)}}
+function showRecipe(id){selected=id;let r=getAll().find(x=>x.id===id);if(!r)return;let el=$('detail');el.replaceChildren();const add=(tag,content,parent=el)=>{let x=document.createElement(tag);x.textContent=content||'';parent.append(x);return x};add('h2',r.name);if(r.photos?.[0]){let im=document.createElement('img');im.src=r.photos[0];im.className='cover';el.append(im)}add('p',[r.servings,r.time,r.calories,r.salt,r.tags].filter(Boolean).join(' / '));add('h3','材料');add('div',r.ingredients||'未入力');if(r.prep){add('h3','下ごしらえ');add('div',r.prep)}add('h3','作り方');if(Array.isArray(r.stepDetails)&&r.stepDetails.length){r.stepDetails.forEach((step,i)=>{let row=document.createElement('div');row.className='stepRow';if(step.photo){let im=document.createElement('img');im.src=step.photo;im.alt='工程'+(i+1);row.append(im)}add('div','STEP '+(i+1)+'\n'+(step.text||''),row);el.append(row)})}else add('div',r.steps||'未入力');if(r.notes){add('h3','アレンジ・注意点');add('div',r.notes).className='noteBlock'}$('detailPanel').classList.remove('hidden');$('detailPanel').scrollIntoView({behavior:'smooth'})}
+function editRecipe(){let r=getAll().find(x=>x.id===selected);if(!r)return;editing=r.id;for(let f of fields)$(f).value=r[f]||'';photos=(r.photos||[]).map((src,i)=>({src,name:'保存写真'+(i+1)}));renderPhotos();switchRecipePage('new')}
+function deleteRecipe(){if(!confirm('このレシピを削除しますか？'))return;setAll(getAll().filter(x=>x.id!==selected));$('detailPanel').classList.add('hidden');renderList()}
+function exportData(){let b=new Blob([JSON.stringify({version:2,recipes:getAll()},null,2)],{type:'application/json'}),url=URL.createObjectURL(b),a=document.createElement('a');a.href=url;a.download='うちのレシピ帳_バックアップ_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function importData(f){if(!f)return;try{let o=JSON.parse(await f.text()),arr=Array.isArray(o)?o:o.recipes;if(!Array.isArray(arr)||arr.some(r=>!r.id||!r.name))throw Error('形式が正しくありません');if(!confirm(`${arr.length}件を読み込みます。既存データと同じIDは上書きします。よろしいですか？`))return;let m=new Map(getAll().map(r=>[r.id,r]));for(let r of arr)m.set(r.id,r);setAll([...m.values()]);alert('読み込みました');switchRecipePage('list')}catch(e){alert('読み込みに失敗しました：'+e.message)}}
+
+let zipLibPromise;
+async function loadZipLib(){
+ if(window.JSZip)return window.JSZip;
+ if(!zipLibPromise)zipLibPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+  script.onload=()=>window.JSZip?resolve(window.JSZip):reject(new Error('ZIPライブラリを利用できません'));
+  script.onerror=()=>reject(new Error('ZIPライブラリを読み込めません。ネット接続を確認してください'));
+  document.head.appendChild(script);
+ });
+ return zipLibPromise;
+}
+async function importRecipeZip(file){
+ if(!file)return;
+ const st=$('zipStatus');st.textContent='ZIPを確認しています…';
+ try{
+  if(file.size>40*1024*1024)throw Error('ZIPは40MB以下にしてください');
+  const JSZip=await loadZipLib();
+  const zip=await JSZip.loadAsync(file);
+  const entry=zip.file('recipes.json');
+  if(!entry)throw Error('recipes.json がZIPの直下にありません');
+  const data=JSON.parse(await entry.async('string'));
+  const items=Array.isArray(data)?data:data.recipes;
+  if(!Array.isArray(items)||items.length===0)throw Error('レシピが見つかりません');
+  if(items.length>100)throw Error('一度に取り込めるのは100品までです');
+  const parsed=[];
+  for(let i=0;i<items.length;i++){
+   const src=items[i];
+   if(!src||typeof src!=='object'||typeof src.name!=='string'||!src.name.trim())throw Error(`${i+1}品目の料理名が不正です`);
+   const id=typeof src.id==='string'&&src.id?src.id:'import-'+Date.now()+'-'+i;
+   const r={id,name:src.name.trim(),servings:String(src.servings||''),time:String(src.time||''),tags:String(src.tags||''),ingredients:String(src.ingredients||''),steps:String(src.steps||''),raw:String(src.raw||''),prep:String(src.prep||''),notes:String(src.notes||''),calories:String(src.calories||''),salt:String(src.salt||''),updated:new Date().toISOString(),photos:[],stepDetails:[]};
+   const images=src.cover?[src.cover]:Array.isArray(src.images)?src.images:[];
+   for(const path of images.slice(0,4)){
+    if(typeof path!=='string'||!/^images\/[a-zA-Z0-9_.-]+\.(png|jpe?g|webp)$/i.test(path))throw Error('写真のパスが不正です');
+    const img=zip.file(path);if(!img)throw Error('写真が見つかりません: '+path);
+    const blob=await img.async('blob');
+    if(blob.size>6*1024*1024)throw Error('写真が大きすぎます: '+path);
+    const mime=/\.png$/i.test(path)?'image/png':/\.webp$/i.test(path)?'image/webp':'image/jpeg';
+    const url=URL.createObjectURL(new Blob([blob],{type:mime}));
+    try{r.photos.push(await rotateCanvas(url,0,650,.65))}finally{URL.revokeObjectURL(url)}
+   }
+   if(Array.isArray(src.stepDetails))for(const step of src.stepDetails.slice(0,12)){
+    let obj={text:String(step.text||'')};
+    if(step.image){const path=step.image;if(typeof path!=='string'||!/^images\/[a-zA-Z0-9_.-]+\.(png|jpe?g|webp)$/i.test(path))throw Error('工程写真のパスが不正です');const img=zip.file(path);if(!img)throw Error('工程写真がありません: '+path);const blob=await img.async('blob');if(blob.size>6*1024*1024)throw Error('工程写真が大きすぎます');const mime=/\.png$/i.test(path)?'image/png':/\.webp$/i.test(path)?'image/webp':'image/jpeg';const url=URL.createObjectURL(new Blob([blob],{type:mime}));try{obj.photo=await rotateCanvas(url,0,420,.60)}finally{URL.revokeObjectURL(url)}}r.stepDetails.push(obj)
+   }
+   parsed.push(r);
+  }
+  const old=getAll();const ids=new Set(old.map(r=>r.id));
+  const duplicates=parsed.filter(r=>ids.has(r.id)).length;
+  if(!confirm(`${parsed.length}品を取り込みます。\n同じIDの${duplicates}品は更新されます。\n既存のほかのレシピは残ります。よろしいですか？`)){st.textContent='取り込みをキャンセルしました';return}
+  const map=new Map(old.map(r=>[r.id,r]));for(const r of parsed)map.set(r.id,r);
+  try{setAll([...map.values()])}catch{throw Error('端末の保存容量が足りません。バックアップを保存してから再試行してください')}
+  st.textContent=`取り込み完了：${parsed.length}品（更新 ${duplicates}品）`;
+  switchRecipePage('list');alert(`${parsed.length}品のレシピを登録しました！`);
+ }catch(e){st.textContent='取り込み失敗：'+e.message;alert('ZIPの読み込みに失敗しました：'+e.message)}
+}
+</script></body></html>
